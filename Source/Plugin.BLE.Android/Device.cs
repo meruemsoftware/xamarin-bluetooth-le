@@ -125,17 +125,18 @@ namespace Plugin.BLE.Android
 
             if (connectParameters.ForceBleTransport)
             {
-                ConnectToGattForceBleTransportAPI(connectParameters.AutoConnect, cancellationToken);
+                ConnectToGattForceBleTransportAPI(connectParameters.AutoConnect, connectParameters.BondDevice, cancellationToken);
             }
             else
             {
                 var connectGatt = NativeDevice.ConnectGatt(Application.Context, connectParameters.AutoConnect, _gattCallback);
+                if (connectParameters.BondDevice) NativeDevice.CreateBond();
                 _connectCancellationTokenRegistration.Dispose();
                 _connectCancellationTokenRegistration = cancellationToken.Register(() => connectGatt.Disconnect());
             }
         }
 
-        private void ConnectToGattForceBleTransportAPI(bool autoconnect, CancellationToken cancellationToken)
+        private void ConnectToGattForceBleTransportAPI(bool autoconnect, bool bonddevice, CancellationToken cancellationToken)
         {
             //This parameter is present from API 18 but only public from API 23
             //So reflection is used before API 23
@@ -143,6 +144,7 @@ namespace Plugin.BLE.Android
             {
                 //no transport mode before lollipop, it will probably not work... gattCallBackError 133 again alas
                 var connectGatt = NativeDevice.ConnectGatt(Application.Context, autoconnect, _gattCallback);
+                if (bonddevice) NativeDevice.CreateBond();
                 _connectCancellationTokenRegistration.Dispose();
                 _connectCancellationTokenRegistration = cancellationToken.Register(() => connectGatt.Disconnect());
             }
@@ -160,6 +162,7 @@ namespace Plugin.BLE.Android
             else
             {
                 var connectGatt = NativeDevice.ConnectGatt(Application.Context, autoconnect, _gattCallback, BluetoothTransports.Le);
+                if (bonddevice) NativeDevice.CreateBond();
                 _connectCancellationTokenRegistration.Dispose();
                 _connectCancellationTokenRegistration = cancellationToken.Register(() => connectGatt.Disconnect());
             }
