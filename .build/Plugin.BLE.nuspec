@@ -5,6 +5,10 @@
     <title>Bluetooth LE Plugin for Xamarin</title>
     <authors>Adrian Seceleanu, Sven-Michael Stübe</authors>
     <owners>Adrian Seceleanu, Sven-Michael Stübe</owners>
+    <description>
+      Xamarin plugin to access Bluetooth Low Energy functionality on Android, iOS, macOS and UWP.
+      Read the full documentation on the projects page.
+    </description>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
     <projectUrl>https://github.com/xabre/xamarin-bluetooth-le</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
