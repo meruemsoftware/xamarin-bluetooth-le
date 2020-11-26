@@ -22,12 +22,14 @@ void BuildProject(string projectName, string targetSubDir)
     Information("Building {0} ...", projectName);
     var project = GetProjectDir(projectName);
     var outputDir = BuildTargetDir.Combine(targetSubDir);
-    MSBuild(project, settings => settings
+    var msbuildSettings = new MSBuildSettings()
             .SetConfiguration("Release")                                   
             .WithTarget("Build")
             .UseToolVersion(MSBuildToolVersion.VS2019)
             .SetMSBuildPlatform(MSBuildPlatform.x86)                        
-            .WithProperty("OutDir", outputDir.FullPath));
+            .WithProperty("OutDir", outputDir.FullPath);
+    msbuildSettings.ToolPath = "C:\\Microsoft\\VisualStudio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\MSBuild.exe";
+    MSBuild(project, msbuildSettings);
 }
 
 // string NuVersionGet (string specFile)
