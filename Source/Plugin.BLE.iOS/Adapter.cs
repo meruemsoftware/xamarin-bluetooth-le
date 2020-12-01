@@ -162,7 +162,8 @@ namespace Plugin.BLE.iOS
             _centralManager.ScanForPeripherals(serviceCbuuids, new PeripheralScanningOptions { AllowDuplicatesKey = allowDuplicatesKey });
         }
 
-        protected override void DisconnectDeviceNative(IDevice device)
+        //TODO: implement removeBond
+        protected override void DisconnectDeviceNative(IDevice device, bool removeBond)
         {
             _deviceOperationRegistry[device.Id.ToString()] = device;
             _centralManager.CancelPeripheralConnection(device.NativeDevice as CBPeripheral);

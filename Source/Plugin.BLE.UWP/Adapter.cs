@@ -101,7 +101,8 @@ namespace Plugin.BLE.UWP
             }
         }
 
-        protected override void DisconnectDeviceNative(IDevice device)
+        // TODO: implement removeBond
+        protected override void DisconnectDeviceNative(IDevice device, bool removeBond)
         {
             // Windows doesn't support disconnecting, so currently just dispose of the device
             Trace.Message($"Disconnected from device with ID:  {device.Id.ToString()}");
