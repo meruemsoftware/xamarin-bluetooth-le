@@ -15,6 +15,9 @@ using System.Threading;
 using Java.Util;
 using Java.Lang;
 using Java.Lang.Reflect;
+using Exception = System.Exception;
+using Enum = System.Enum;
+using Array = System.Array;
 
 namespace Plugin.BLE.Android
 {
