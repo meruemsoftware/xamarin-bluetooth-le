@@ -105,7 +105,7 @@ namespace Plugin.BLE.Abstractions
 
         public virtual void Dispose()
         {
-            Adapter.DisconnectDeviceAsync(this);
+            Adapter.DisconnectDeviceAsync(this, false);
         }
 
         public void DisposeServices()
