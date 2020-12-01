@@ -135,7 +135,7 @@ namespace Plugin.BLE.Abstractions
             }
         }
 
-        public Task DisconnectDeviceAsync(IDevice device)
+        public Task DisconnectDeviceAsync(IDevice device, bool removeBond)
         {
             if (!ConnectedDevices.Contains(device))
             {
@@ -144,7 +144,7 @@ namespace Plugin.BLE.Abstractions
             }
 
             return TaskBuilder.FromEvent<bool, EventHandler<DeviceEventArgs>, EventHandler<DeviceErrorEventArgs>>(
-               execute: () => DisconnectDeviceNative(device),
+               execute: () => DisconnectDeviceNative(device, removeBond),
 
                getCompleteHandler: (complete, reject) => ((sender, args) =>
                {
@@ -235,7 +235,7 @@ namespace Plugin.BLE.Abstractions
         protected abstract Task StartScanningForDevicesNativeAsync(Guid[] serviceUuids, bool allowDuplicatesKey, CancellationToken scanCancellationToken);
         protected abstract void StopScanNative();
         protected abstract Task ConnectToDeviceNativeAsync(IDevice device, ConnectParameters connectParameters, CancellationToken cancellationToken);
-        protected abstract void DisconnectDeviceNative(IDevice device);
+        protected abstract void DisconnectDeviceNative(IDevice device, bool removeBond);
 
         public abstract Task<IDevice> ConnectToKnownDeviceAsync(Guid deviceGuid, ConnectParameters connectParameters = default, CancellationToken cancellationToken = default);
         public abstract IReadOnlyList<IDevice> GetSystemConnectedOrPairedDevices(Guid[] services = null);

@@ -137,10 +137,10 @@ namespace Plugin.BLE.Android
             return Task.CompletedTask;
         }
 
-        protected override void DisconnectDeviceNative(IDevice device)
+        protected override void DisconnectDeviceNative(IDevice device, bool removeBond)
         {
             //make sure everything is disconnected
-            ((Device)device).Disconnect();
+            ((Device)device).Disconnect(removeBond);
         }
 
         public override async Task<IDevice> ConnectToKnownDeviceAsync(Guid deviceGuid, ConnectParameters connectParameters = default(ConnectParameters), CancellationToken cancellationToken = default(CancellationToken))

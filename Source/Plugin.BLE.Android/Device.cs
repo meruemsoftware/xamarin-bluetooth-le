@@ -13,6 +13,8 @@ using Plugin.BLE.Android.CallbackEventArgs;
 using Trace = Plugin.BLE.Abstractions.Trace;
 using System.Threading;
 using Java.Util;
+using Java.Lang;
+using Java.Lang.Reflect;
 
 namespace Plugin.BLE.Android
 {
@@ -173,13 +175,19 @@ namespace Plugin.BLE.Android
         /// This method is only called by a user triggered disconnect.
         /// A user will first trigger _gatt.disconnect -> which in turn will trigger _gatt.Close() via the gattCallback
         /// </summary>
-        public void Disconnect()
+        public void Disconnect(bool removeBond)
         {
             if (_gatt != null)
             {
                 IsOperationRequested = true;
 
                 DisposeServices();
+
+                if (removeBond)
+                {
+                    Method m = NativeDevice.Class.GetMethod("removeBond", (Class[])null);
+                    m.Invoke(NativeDevice, (Java.Lang.Object[])null);
+                }
 
                 _gatt.Disconnect();
             }
