@@ -31,7 +31,7 @@ namespace Plugin.BLE.Abstractions.Utils
             return Task.FromResult(0);
         }
 
-        protected override void DisconnectDeviceNative(IDevice device)
+        protected override void DisconnectDeviceNative(IDevice device, bool removeDevice)
         {
             TraceUnavailability();
         }
