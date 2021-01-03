@@ -14,6 +14,8 @@ namespace Plugin.BLE.Abstractions
 
     public static class ICancellationMasterExtensions
     {
+        private static bool isCancelling = false;
+
         public static CancellationTokenSource GetCombinedSource(this ICancellationMaster cancellationMaster, CancellationToken token)
         {
             return CancellationTokenSource.CreateLinkedTokenSource(cancellationMaster.TokenSource.Token, token);
@@ -28,8 +30,13 @@ namespace Plugin.BLE.Abstractions
 
         public static void CancelEverythingAndReInitialize(this ICancellationMaster cancellationMaster)
         {
-            cancellationMaster.CancelEverything();
-            cancellationMaster.TokenSource = new CancellationTokenSource();
+            if (!isCancelling)
+            {
+                isCancelling = true;
+                cancellationMaster.CancelEverything();
+                cancellationMaster.TokenSource = new CancellationTokenSource();
+                isCancelling = false;
+            }
         }
     }
 
