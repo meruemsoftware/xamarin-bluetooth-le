@@ -51,7 +51,7 @@ namespace Plugin.BLE.Android
             }
         }
 
-        protected override Task StartScanningForDevicesNativeAsync(Guid[] serviceUuids, string[] deviceNames, bool allowDuplicatesKey, CancellationToken scanCancellationToken)
+        protected override Task StartScanningForDevicesNativeAsync(Guid[] serviceUuids, bool allowDuplicatesKey, CancellationToken scanCancellationToken)
         {
             if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
             {
@@ -59,7 +59,7 @@ namespace Plugin.BLE.Android
             }
             else
             {
-                StartScanningNew(serviceUuids, deviceNames);
+                StartScanningNew(serviceUuids);
             }
 
             return Task.FromResult(true);
@@ -79,9 +79,9 @@ namespace Plugin.BLE.Android
 #pragma warning restore 618
         }
 
-        private void StartScanningNew(Guid[] serviceUuids, string[] deviceNames)
+        private void StartScanningNew(Guid[] serviceUuids)
         {
-            var hasFilter = (serviceUuids?.Any() ?? false) || (deviceNames?.Any() ?? false);
+            var hasFilter = serviceUuids?.Any() ?? false;
             List<ScanFilter> scanFilters = null;
 
             if (hasFilter)
@@ -91,12 +91,6 @@ namespace Plugin.BLE.Android
                 {
                     var sfb = new ScanFilter.Builder();
                     sfb.SetServiceUuid(ParcelUuid.FromString(serviceUuid.ToString()));
-                    scanFilters.Add(sfb.Build());
-                }
-                foreach (var deviceName in deviceNames)
-                {
-                    var sfb = new ScanFilter.Builder();
-                    sfb.SetDeviceName(deviceName);
                     scanFilters.Add(sfb.Build());
                 }
             }
