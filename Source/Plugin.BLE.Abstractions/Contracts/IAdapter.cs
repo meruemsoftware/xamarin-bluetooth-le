@@ -103,7 +103,7 @@ namespace Plugin.BLE.Abstractions.Contracts
         /// <param name="device">Device to connect from.</param>
         /// <param name="removeBond">Remove bond from device.</param>
         /// <returns>A task that represents the asynchronous read operation. The Task will finish after the device has been disconnected successfuly.</returns>
-        Task DisconnectDeviceAsync(IDevice device, bool removeBond);
+        Task DisconnectDeviceAsync(IDevice device, bool removeBond = false);
 
         /// <summary>
         /// Connects to a device with a known GUID without scanning and if in range. Does not scan for devices.

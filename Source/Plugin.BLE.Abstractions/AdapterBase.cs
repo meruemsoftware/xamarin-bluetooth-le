@@ -135,7 +135,7 @@ namespace Plugin.BLE.Abstractions
             }
         }
 
-        public Task DisconnectDeviceAsync(IDevice device, bool removeBond)
+        public Task DisconnectDeviceAsync(IDevice device, bool removeBond = false)
         {
             if (!ConnectedDevices.Contains(device))
             {
