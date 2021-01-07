@@ -214,11 +214,11 @@ namespace Plugin.BLE.Abstractions
             {
                 Trace.Message("DisconnectedPeripheral by lost signal: {0}", device.Name);
                 DeviceConnectionLost?.Invoke(this, new DeviceErrorEventArgs { Device = device });
+            }
 
-                if (DiscoveredDevicesRegistry.TryRemove(device.Id, out _))
-                {
-                    Trace.Message("Removed device from discovered devices list: {0}", device.Name);
-                }
+            if (DiscoveredDevicesRegistry.TryRemove(device.Id, out _))
+            {
+                Trace.Message("Removed device from discovered devices list: {0}", device.Name);
             }
         }
 
