@@ -134,10 +134,14 @@ namespace Plugin.BLE.Android
             }
             else
             {
-                var connectGatt = NativeDevice.ConnectGatt(Application.Context, connectParameters.AutoConnect, _gattCallback);
-                if (connectParameters.BondDevice) NativeDevice.CreateBond();
+                var connectGatt = _gatt != null ? _gatt : NativeDevice.ConnectGatt(Application.Context, connectParameters.AutoConnect, _gattCallback);
                 _connectCancellationTokenRegistration.Dispose();
                 _connectCancellationTokenRegistration = cancellationToken.Register(() => connectGatt.Disconnect());
+
+                if (connectParameters.BondDevice)
+                {
+                    NativeDevice.CreateBond();
+                }
             }
         }
 

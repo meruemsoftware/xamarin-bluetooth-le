@@ -79,6 +79,8 @@ namespace Plugin.BLE.Android
                         else
                         {
                             //we already hadled device error so no need th raise disconnect event(happens when device not in range)
+                            _device.Update(gatt.Device, null);
+                            gatt.Close();
                             _adapter.HandleDisconnectedDevice(true, _device);
                         }
                         break;
