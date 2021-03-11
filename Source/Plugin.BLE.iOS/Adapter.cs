@@ -142,7 +142,7 @@ namespace Plugin.BLE.iOS
                 };
         }
 
-        protected override async Task StartScanningForDevicesNativeAsync(Guid[] serviceUuids, bool allowDuplicatesKey, CancellationToken scanCancellationToken)
+        protected override async Task StartScanningForDevicesNativeAsync(Guid[] serviceUuids, ManufacturerData[] manufacturerDataFilters, bool allowDuplicatesKey, CancellationToken scanCancellationToken)
         {
             // Wait for the PoweredOn state
             await WaitForState(CBCentralManagerState.PoweredOn, scanCancellationToken).ConfigureAwait(false);

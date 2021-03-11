@@ -26,7 +26,7 @@ namespace Plugin.BLE.UWP
             _bluetoothHelper = bluetoothHelper;
         }
 
-        protected override Task StartScanningForDevicesNativeAsync(Guid[] serviceUuids, bool allowDuplicatesKey, CancellationToken scanCancellationToken)
+        protected override Task StartScanningForDevicesNativeAsync(Guid[] serviceUuids, ManufacturerData[] manufacturerDataFilters, bool allowDuplicatesKey, CancellationToken scanCancellationToken)
         {
             var hasFilter = serviceUuids?.Any() ?? false;
 
@@ -39,6 +39,14 @@ namespace Plugin.BLE.UWP
                 foreach (var uuid in serviceUuids)
                 {
                     _bleWatcher.AdvertisementFilter.Advertisement.ServiceUuids.Add(uuid);
+                }
+                foreach (var manufacturerData in manufacturerDataFilters)
+                {
+                    _bleWatcher.AdvertisementFilter.Advertisement.ManufacturerData.Add(new BluetoothLEManufacturerData
+                    {
+                        CompanyId = (ushort)manufacturerData.Id,
+                        Data = manufacturerData.Data.AsBuffer()
+                    });
                 }
 
                 Trace.Message($"ScanFilters: {string.Join(", ", serviceUuids)}");
