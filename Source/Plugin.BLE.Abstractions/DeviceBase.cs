@@ -14,8 +14,6 @@ namespace Plugin.BLE.Abstractions
 
     public static class ICancellationMasterExtensions
     {
-        private static bool isCancelling = false;
-
         public static CancellationTokenSource GetCombinedSource(this ICancellationMaster cancellationMaster, CancellationToken token)
         {
             return CancellationTokenSource.CreateLinkedTokenSource(cancellationMaster.TokenSource.Token, token);
@@ -30,62 +28,55 @@ namespace Plugin.BLE.Abstractions
 
         public static void CancelEverythingAndReInitialize(this ICancellationMaster cancellationMaster)
         {
-            if (!isCancelling)
-            {
-                isCancelling = true;
-                cancellationMaster.CancelEverything();
-                cancellationMaster.TokenSource = new CancellationTokenSource();
-                isCancelling = false;
-            }
+            cancellationMaster.CancelEverything();
+            cancellationMaster.TokenSource = new CancellationTokenSource();
         }
     }
 
-    public abstract class DeviceBase<TNativeDevice> : IDevice, ICancellationMaster
+    public abstract class DeviceBase : IDevice, ICancellationMaster
     {
         protected readonly IAdapter Adapter;
-        protected readonly Dictionary<Guid, IService> KnownServices = new Dictionary<Guid, IService>();
+        private readonly List<IService> KnownServices = new List<IService>();
         public Guid Id { get; protected set; }
         public string Name { get; protected set; }
         public int Rssi { get; protected set; }
         public DeviceState State => GetState();
-        public IReadOnlyList<AdvertisementRecord> AdvertisementRecords { get; protected set; }
-        public TNativeDevice NativeDevice { get; protected set; }
-        CancellationTokenSource ICancellationMaster.TokenSource { get; set; } = new CancellationTokenSource();
-        object IDevice.NativeDevice => NativeDevice;
+        public IList<AdvertisementRecord> AdvertisementRecords { get; protected set; }
+        public abstract object NativeDevice { get; }
 
-        protected DeviceBase(IAdapter adapter, TNativeDevice nativeDevice)
+        CancellationTokenSource ICancellationMaster.TokenSource { get; set; } = new CancellationTokenSource();
+
+        protected DeviceBase(IAdapter adapter)
         {
             Adapter = adapter;
-            NativeDevice = nativeDevice;
         }
 
         public async Task<IReadOnlyList<IService>> GetServicesAsync(CancellationToken cancellationToken = default)
         {
-            using (var source = this.GetCombinedSource(cancellationToken))
+            lock (KnownServices)
             {
-                foreach (var service in await GetServicesNativeAsync())
+                if (KnownServices.Any())
                 {
-                    KnownServices[service.Id] = service;
+                    return KnownServices.ToArray();
                 }
             }
 
-            return KnownServices.Values.ToList();
+            using (var source = this.GetCombinedSource(cancellationToken))
+            {
+                var services = await GetServicesNativeAsync();
+
+                lock (KnownServices)
+                {
+                    KnownServices.AddRange(services);
+                    return KnownServices.ToArray();
+                }
+            }
         }
 
         public async Task<IService> GetServiceAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            if (KnownServices.ContainsKey(id))
-            {
-                return KnownServices[id];
-            }
-
-            var service = await GetServiceNativeAsync(id);
-            if (service == null)
-            {
-                return null;
-            }
-
-            return KnownServices[id] = service;
+            var services = await GetServicesAsync(cancellationToken);
+            return services.ToList().FirstOrDefault(x => x.Id == id);
         }
 
         public async Task<int> RequestMtuAsync(int requestValue)
@@ -101,7 +92,6 @@ namespace Plugin.BLE.Abstractions
         public abstract Task<bool> UpdateRssiAsync();
         protected abstract DeviceState GetState();
         protected abstract Task<IReadOnlyList<IService>> GetServicesNativeAsync();
-        protected abstract Task<IService> GetServiceNativeAsync(Guid id);
         protected abstract Task<int> RequestMtuNativeAsync(int requestValue);
         protected abstract bool UpdateConnectionIntervalNative(ConnectionInterval interval);
 
@@ -110,28 +100,31 @@ namespace Plugin.BLE.Abstractions
             return Name;
         }
 
-        public virtual void Dispose()
+        public void Dispose()
         {
-            Adapter.DisconnectDeviceAsync(this, false);
+            Adapter.DisconnectDeviceAsync(this);
         }
 
-        public void DisposeServices()
+        public void ClearServices()
         {
             this.CancelEverythingAndReInitialize();
 
-            foreach (var service in KnownServices.Values)
+            lock (KnownServices)
             {
-                try
+                foreach (var service in KnownServices)
                 {
-                    service.Dispose();
+                    try
+                    {
+                        service.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.Message("Exception while cleanup of service: {0}", ex.Message);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Trace.Message("Exception while cleanup of service: {0}", ex.Message);
-                }
-            }
 
-            KnownServices.Clear();
+                KnownServices.Clear();
+            }
         }
 
         public override bool Equals(object other)
@@ -146,7 +139,7 @@ namespace Plugin.BLE.Abstractions
                 return false;
             }
 
-            var otherDeviceBase = (DeviceBase<TNativeDevice>)other;
+            var otherDeviceBase = (DeviceBase) other;
             return Id == otherDeviceBase.Id;
         }
 

@@ -137,7 +137,7 @@ namespace Plugin.BLE.Android
                 var connectGatt = NativeDevice.ConnectGatt(Application.Context, connectParameters.AutoConnect, _gattCallback);
                 if (connectParameters.BondDevice) NativeDevice.CreateBond();
                 _connectCancellationTokenRegistration.Dispose();
-                _connectCancellationTokenRegistration = cancellationToken.Register(() => connectGatt.Disconnect());
+                _connectCancellationTokenRegistration = cancellationToken.Register(() => DisconnectAndClose(connectGatt));
             }
         }
 
@@ -151,7 +151,7 @@ namespace Plugin.BLE.Android
                 var connectGatt = NativeDevice.ConnectGatt(Application.Context, autoconnect, _gattCallback);
                 if (bonddevice) NativeDevice.CreateBond();
                 _connectCancellationTokenRegistration.Dispose();
-                _connectCancellationTokenRegistration = cancellationToken.Register(() => connectGatt.Disconnect());
+                _connectCancellationTokenRegistration = cancellationToken.Register(() => DisconnectAndClose(connectGatt));
             }
             else if (Build.VERSION.SdkInt < BuildVersionCodes.M)
             {
@@ -169,9 +169,14 @@ namespace Plugin.BLE.Android
                 var connectGatt = NativeDevice.ConnectGatt(Application.Context, autoconnect, _gattCallback, BluetoothTransports.Le);
                 if (bonddevice) NativeDevice.CreateBond();
                 _connectCancellationTokenRegistration.Dispose();
-                _connectCancellationTokenRegistration = cancellationToken.Register(() => connectGatt.Disconnect());
+                _connectCancellationTokenRegistration = cancellationToken.Register(() => DisconnectAndClose(connectGatt));
             }
+        }
 
+        private void DisconnectAndClose(BluetoothGatt gatt)
+        {
+            gatt.Disconnect();
+            gatt.Close();
         }
 
         /// <summary>
