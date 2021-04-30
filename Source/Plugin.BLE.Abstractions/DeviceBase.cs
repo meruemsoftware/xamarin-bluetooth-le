@@ -14,7 +14,7 @@ namespace Plugin.BLE.Abstractions
 
     public static class ICancellationMasterExtensions
     {
-        private static object cancellingLock;
+        private static object cancellingLock = new object();
 
         public static CancellationTokenSource GetCombinedSource(this ICancellationMaster cancellationMaster, CancellationToken token)
         {
